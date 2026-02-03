@@ -3,14 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MANISHA Will You Be My Valentine?</title>
+    <title>Will You Be My Valentine?</title>
     <style>
-        body { font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #ffeef2; text-align: center; }
-        h1 { color: #d63384; font-size: 3rem; }
-        .buttons { margin-top: 20px; position: relative; width: 300px; height: 100px; }
-        button { padding: 15px 30px; font-size: 1.2rem; border-radius: 20px; border: none; cursor: pointer; transition: 0.3s; }
-        #yesBtn { background-color: #ff4d6d; color: white; }
-        #noBtn { background-color: #6c757d; color: white; position: absolute; }
+        body { 
+            font-family: 'Arial', sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0;
+            background-color: #ffeef2; 
+            text-align: center; 
+            overflow: hidden; /* Prevents scrollbars when button moves to edges */
+        }
+        h1 { color: #d63384; font-size: 3rem; margin-bottom: 20px; }
+        
+        /* Container for the buttons */
+        .buttons { 
+            display: flex; 
+            gap: 20px; /* Space between buttons */
+            justify-content: center;
+            align-items: center;
+        }
+
+        button { 
+            padding: 15px 30px; 
+            font-size: 1.2rem; 
+            border-radius: 20px; 
+            border: none; 
+            cursor: pointer; 
+            transition: 0.2s ease; 
+            font-weight: bold;
+        }
+
+        #yesBtn { background-color: #ff4d6d; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #yesBtn:hover { transform: scale(1.1); background-color: #ff3355; }
+
+        #noBtn { 
+            background-color: #6c757d; 
+            color: white; 
+            /* Start as static so it sits naturally next to Yes */
+            position: static; 
+        }
     </style>
 </head>
 <body>
@@ -19,11 +54,12 @@
         <h1>Will you be my Valentine? ❤️</h1>
         <div class="buttons">
             <button id="yesBtn" onclick="sendResponse()">Yes!</button>
-            <button id="noBtn" onmouseover="moveButton()">No</button>
+            <!-- Added ontouchstart for mobile support -->
+            <button id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()">No</button>
         </div>
     </div>
 
-    <!-- Replace YOUR_ID with your Formspree ID later -->
+    <!-- Hidden Form -->
     <form id="valentineForm" action="https://formspree.io/f/gshifbiuwefihewfuwhuief" method="POST" style="display:none;">
         <input type="text" name="Response" value="She said YES!">
     </form>
@@ -31,20 +67,43 @@
     <script>
         function moveButton() {
             const btn = document.getElementById('noBtn');
-            const x = Math.random() * (window.innerWidth - btn.offsetWidth);
-            const y = Math.random() * (window.innerHeight - btn.offsetHeight);
-            btn.style.left = x + 'px';
-            btn.style.top = y + 'px';
+
+            // 1. Switch to fixed positioning so coordinates are based on the viewport (screen)
+            //    not the parent container.
+            btn.style.position = 'fixed'; 
+
+            // 2. Calculate available space (Window Size - Button Size)
+            //    We subtract an extra 20px to prevent it from hugging the very edge
+            const maxX = window.innerWidth - btn.offsetWidth - 20;
+            const maxY = window.innerHeight - btn.offsetHeight - 20;
+
+            // 3. Generate random number within that range
+            //    Math.max(0, ...) ensures we don't get negative numbers if screen is tiny
+            const randomX = Math.max(0, Math.random() * maxX);
+            const randomY = Math.max(0, Math.random() * maxY);
+
+            // 4. Apply new coordinates
+            btn.style.left = randomX + 'px';
+            btn.style.top = randomY + 'px';
+            
+            // Optional: Add a high Z-Index so it doesn't get hidden behind the text
+            btn.style.zIndex = "100";
         }
 
         function sendResponse() {
-            // Change UI immediately
-            document.getElementById('mainContent').innerHTML = "<h1>I knew you'd say yes! 🥰 See you soon!</h1>";
+            const mainContent = document.getElementById('mainContent');
             
-            // Submit form to send email to you
+            // Fun UI Update
+            mainContent.innerHTML = `
+                <h1 style="font-size: 4rem;">Yay! 🥰</h1>
+                <p style="font-size: 1.5rem; color: #d63384;">I knew you'd say yes! See you soon! ❤️</p>
+                <img src="https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif" alt="Happy Cat" style="width: 300px; border-radius: 10px;">
+            `;
+            
+            // Logic to check if you updated the Form ID
             const form = document.getElementById('valentineForm');
             if(form.action.includes("gshifbiuwefihewfuwhuief")) {
-                alert("Almost done! You need to set up Formspree to get the email (Step 2).");
+                console.log("Form not sent: Default ID detected. (This is fine for testing)");
             } else {
                 form.submit();
             }
