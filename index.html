@@ -15,16 +15,16 @@
             margin: 0;
             background-color: #ffeef2; 
             text-align: center; 
-            overflow: hidden; /* Prevents scrollbars when button moves to edges */
+            overflow: hidden; /* Prevents scrollbars */
         }
-        h1 { color: #d63384; font-size: 3rem; margin-bottom: 20px; }
+        h1 { color: #d63384; font-size: 3rem; margin-bottom: 20px; padding: 0 10px; }
         
-        /* Container for the buttons */
         .buttons { 
             display: flex; 
-            gap: 20px; /* Space between buttons */
+            gap: 20px; 
             justify-content: center;
             align-items: center;
+            min-height: 60px; /* Ensures space remains when No moves */
         }
 
         button { 
@@ -35,6 +35,7 @@
             cursor: pointer; 
             transition: 0.2s ease; 
             font-weight: bold;
+            z-index: 100; /* Keeps buttons on top */
         }
 
         #yesBtn { background-color: #ff4d6d; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -43,8 +44,17 @@
         #noBtn { 
             background-color: #6c757d; 
             color: white; 
-            /* Start as static so it sits naturally next to Yes */
             position: static; 
+        }
+
+        /* Image styling to ensure it looks good */
+        img { 
+            max-width: 80%; 
+            width: 300px;
+            height: auto; 
+            border-radius: 15px; 
+            margin-top: 20px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -54,59 +64,65 @@
         <h1>Will you be my Valentine? ❤️</h1>
         <div class="buttons">
             <button id="yesBtn" onclick="sendResponse()">Yes!</button>
-            <!-- Added ontouchstart for mobile support -->
             <button id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()">No</button>
         </div>
     </div>
 
-    <!-- Hidden Form -->
-    <form id="valentineForm" action="https://formspree.io/f/gshifbiuwefihewfuwhuief" method="POST" style="display:none;">
-        <input type="text" name="Response" value="She said YES!">
-    </form>
-
     <script>
+        // Your specific ID
+        const FORMSPREE_ID = "mvzqygwe"; 
+
         function moveButton() {
             const btn = document.getElementById('noBtn');
 
-            // 1. Switch to fixed positioning so coordinates are based on the viewport (screen)
-            //    not the parent container.
+            // 1. Switch to fixed to utilize the whole screen
             btn.style.position = 'fixed'; 
 
-            // 2. Calculate available space (Window Size - Button Size)
-            //    We subtract an extra 20px to prevent it from hugging the very edge
-            const maxX = window.innerWidth - btn.offsetWidth - 20;
-            const maxY = window.innerHeight - btn.offsetHeight - 20;
+            // 2. Calculate available space 
+            // We subtract the button size AND a 50px safety buffer
+            // so it never touches the absolute edge of the screen.
+            const safeMargin = 50;
+            const maxX = window.innerWidth - btn.offsetWidth - safeMargin;
+            const maxY = window.innerHeight - btn.offsetHeight - safeMargin;
 
-            // 3. Generate random number within that range
-            //    Math.max(0, ...) ensures we don't get negative numbers if screen is tiny
-            const randomX = Math.max(0, Math.random() * maxX);
-            const randomY = Math.max(0, Math.random() * maxY);
+            // 3. Ensure we don't get negative numbers (Math.max)
+            // The "safeMargin" is also used as the minimum starting point
+            const randomX = Math.max(safeMargin, Math.random() * maxX);
+            const randomY = Math.max(safeMargin, Math.random() * maxY);
 
-            // 4. Apply new coordinates
+            // 4. Apply coordinates
             btn.style.left = randomX + 'px';
             btn.style.top = randomY + 'px';
-            
-            // Optional: Add a high Z-Index so it doesn't get hidden behind the text
-            btn.style.zIndex = "100";
         }
 
         function sendResponse() {
             const mainContent = document.getElementById('mainContent');
             
-            // Fun UI Update
+            // 1. Show the cute UI immediately
             mainContent.innerHTML = `
-                <h1 style="font-size: 4rem;">Yay! 🥰</h1>
+                <h1 style="font-size: 3rem;">Yay! 🥰</h1>
                 <p style="font-size: 1.5rem; color: #d63384;">I knew you'd say yes! See you soon! ❤️</p>
-                <img src="https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif" alt="Happy Cat" style="width: 300px; border-radius: 10px;">
+                <img src="https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-kisses.gif" alt="Cute Bears Kissing">
             `;
-            
-            // Logic to check if you updated the Form ID
-            const form = document.getElementById('valentineForm');
-            if(form.action.includes("gshifbiuwefihewfuwhuief")) {
-                console.log("Form not sent: Default ID detected. (This is fine for testing)");
-            } else {
-                form.submit();
-            }
+
+            // 2. Prepare Data
+            const data = new FormData();
+            data.append("response", "She said YES! ❤️");
+
+            // 3. Send to Formspree SILENTLY (No page reload)
+            fetch("https://formspree.io/f/" + FORMSPREE_ID, {
+                method: "POST",
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            }).then(response => {
+                if (response.ok) {
+                    console.log("Success: Email sent!");
+                } else {
+                    console.log("Error sending email.");
+                }
+            }).catch(error => {
+                console.log("Network error.");
+            });
         }
     </script>
 </body>
