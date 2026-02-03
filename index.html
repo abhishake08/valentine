@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine?</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #ffeef2; text-align: center; }
+        h1 { color: #d63384; font-size: 3rem; }
+        .buttons { margin-top: 20px; position: relative; width: 300px; height: 100px; }
+        button { padding: 15px 30px; font-size: 1.2rem; border-radius: 20px; border: none; cursor: pointer; transition: 0.3s; }
+        #yesBtn { background-color: #ff4d6d; color: white; }
+        #noBtn { background-color: #6c757d; color: white; position: absolute; }
+    </style>
+</head>
+<body>
+
+    <div id="mainContent">
+        <h1>Will you be my Valentine? ❤️</h1>
+        <div class="buttons">
+            <button id="yesBtn" onclick="sendResponse()">Yes!</button>
+            <button id="noBtn" onmouseover="moveButton()">No</button>
+        </div>
+    </div>
+
+    <!-- Replace YOUR_ID with your Formspree ID later -->
+    <form id="valentineForm" action="https://formspree.io/f/gshifbiuwefihewfuwhuief" method="POST" style="display:none;">
+        <input type="text" name="Response" value="She said YES!">
+    </form>
+
+    <script>
+        function moveButton() {
+            const btn = document.getElementById('noBtn');
+            const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+            const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+        }
+
+        function sendResponse() {
+            // Change UI immediately
+            document.getElementById('mainContent').innerHTML = "<h1>I knew you'd say yes! 🥰 See you soon!</h1>";
+            
+            // Submit form to send email to you
+            const form = document.getElementById('valentineForm');
+            if(form.action.includes("gshifbiuwefihewfuwhuief")) {
+                alert("Almost done! You need to set up Formspree to get the email (Step 2).");
+            } else {
+                form.submit();
+            }
+        }
+    </script>
+</body>
+</html>
